@@ -41,32 +41,33 @@ class MyfatoorahService implements PaymentInterface
         $response = $this->payment->callAPI($url , $invoiceData);
         
         return [
-            'message' => $response->Message,
+            'message' => $response->Message ?? 'Payment request sent',
             'invoiceId' => $response->Data->InvoiceId,
             'InvoiceUrl' => $response->Data->InvoiceURL,
         ];
     }
-   /* public function handleCallback(Request $request)
+    /*public function handleCallback(Request $request)
     {
         $invoiceId = $request->input('invoiceId');
-        $paymentStatus = $request->input('paymentStatus');
+
+        // استعلام MyFatoorah رسميًا عن حالة الدفع
+        $response = $this->payment->getAPIError($invoiceId); // استخدمي الميثود المناسبة من المكتبة
+
+        $status = $response->InvoiceStatus ?? 'Failed';
 
         $order = Order::where('invoice_id', $invoiceId)->first();
-
         if (!$order) {
             return ['success' => false, 'message' => 'Order not found'];
         }
 
-        if ($paymentStatus === 'Paid') {
+        if ($status === 'Paid') {
             $order->status = 'paid';
             $order->paid_at = now();
             $order->save();
-
             return ['success' => true, 'message' => 'Payment successful', 'order_id' => $order->id];
         } else {
             $order->status = 'failed';
             $order->save();
-
             return ['success' => false, 'message' => 'Payment failed', 'order_id' => $order->id];
         }
     }*/

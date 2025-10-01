@@ -26,4 +26,7 @@ This is a full-featured Ecommerce project built with Laravel.
 ---
 
 ## Updates
-- [Add updates here every time a new feature or fix is added]
+
+[Add updates here every time a new feature or fix is added]
+
+

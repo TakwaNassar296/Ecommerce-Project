@@ -48,7 +48,8 @@ Route::middleware(['auth:sanctum'])->group(function(){
 
     // Checkout Routes
     Route::get('/pay', [CheckoutController::class, 'pay']);
-    Route::get('/payment/callback', [CheckoutController::class, 'callback'])->name('payment.callback');
+    Route::post('/payment/callback', [CheckoutController::class, 'paymentCallback']);
+    Route::get('/payment/success', [CheckoutController::class, 'success'])->name('payment.success');
     Route::get('/payment/error', [CheckoutController::class, 'error'])->name('payment.error');
 
 

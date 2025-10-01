@@ -7,7 +7,7 @@ use Exception;
 
 class PaymentFactory
 {
-    public static function create(string $gateway):PaymentInterface
+    public static function make(string $gateway):PaymentInterface
     {
         return match($gateway){
             'myfatoorah' => new MyfatoorahService(),
