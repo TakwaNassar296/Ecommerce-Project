@@ -35,7 +35,9 @@ class MyfatoorahService implements PaymentInterface
             'NotificationOption' => 'All'
         ];
 
-        $url = 'https://apitest.myfatoorah.com/v2/SendPayment' ; 
+        $url = ($this->payment->config['isTest'] ?? true) 
+            ? 'https://apitest.myfatoorah.com/v2/SendPayment'
+            : 'https://api.myfatoorah.com/v2/SendPayment';
 
 
         $response = $this->payment->callAPI($url , $invoiceData);
@@ -46,29 +48,40 @@ class MyfatoorahService implements PaymentInterface
             'InvoiceUrl' => $response->Data->InvoiceURL,
         ];
     }
-    /*public function handleCallback(Request $request)
+    public function handleCallback($invoiceId)
     {
-        $invoiceId = $request->input('invoiceId');
+        $order = Order::where('invoice_id', $invoiceId)->firstOrFail();
 
-        // استعلام MyFatoorah رسميًا عن حالة الدفع
-        $response = $this->payment->getAPIError($invoiceId); // استخدمي الميثود المناسبة من المكتبة
+        $url = ($this->payment->config['isTest'] ?? true)
+            ? 'https://apitest.myfatoorah.com/v2/GetPaymentStatus'
+            : 'https://api.myfatoorah.com/v2/GetPaymentStatus';
 
-        $status = $response->InvoiceStatus ?? 'Failed';
+        $response = $this->payment->callAPI($url, [
+            'Key' => $invoiceId,
+            'KeyType' => 'InvoiceId'
+        ]);
 
-        $order = Order::where('invoice_id', $invoiceId)->first();
-        if (!$order) {
-            return ['success' => false, 'message' => 'Order not found'];
-        }
+        $status = $response->Data->InvoiceStatus ?? 'Failed';
 
         if ($status === 'Paid') {
             $order->status = 'paid';
             $order->paid_at = now();
             $order->save();
-            return ['success' => true, 'message' => 'Payment successful', 'order_id' => $order->id];
+
+            return [
+                'success' => true,
+                'message' => 'Payment successful',
+                'order_id' => $order->id
+            ];
         } else {
             $order->status = 'failed';
             $order->save();
-            return ['success' => false, 'message' => 'Payment failed', 'order_id' => $order->id];
+
+            return [
+                'success' => false,
+                'message' => 'Payment failed',
+                'order_id' => $order->id
+            ];
         }
-    }*/
+    }
 }

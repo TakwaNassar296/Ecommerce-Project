@@ -10,7 +10,7 @@ use App\Http\Controllers\Controller;
 
 class CheckoutController extends Controller 
 {
-  public function pay(Request $request)
+    public function pay(Request $request)
     {
         
         $order = Order::with('items.variant.product')
@@ -35,7 +35,7 @@ class CheckoutController extends Controller
             'customer_email'  => $request->user()->email ?? 'guest@example.com',
             'Customer_mobile' => $request->user()->phone ?? '01210569957',
             'items'           => $items,
-            'callback_url'    => route('payment.success'),
+            'callback_url'    => route('payment.callback'),
             'error_url'       => route('payment.error'),
             'currency'        => 'USD',
         ];
@@ -46,17 +46,11 @@ class CheckoutController extends Controller
 
         return response()->json($paymentResponse);
     }
-   /* public function paymentCallback(Request $request)
+    public function paymentCallback(Request $request)
     {
-        $paymentMethod = $request->input('payment_method', 'myfatoorah');
-        $gateway = PaymentFactory::make($paymentMethod);
-
-        $result = $gateway->handleCallback($request);
-
-        if ($result['success']) {
-            return redirect()->route('checkout.success')->with('success', $result['message']);
-        } else {
-            return redirect()->route('checkout.failed')->with('error', $result['message']);
-        }
-    }*/
+        $invoiceId = $request->input('invoiceId'); 
+        $gateway = PaymentFactory::make('myfatoorah');
+        $result = $gateway->handleCallback($invoiceId); 
+        return response()->json($result);
+    }
 }

@@ -16,7 +16,11 @@ class Order extends Model
         'payment_status',
         'coupon_id',
         'subtotal',
-        'discount'
+        'discount',
+        'currency',
+        'invoice_id',
+        'paid_at',
+        'gateway_id'
     ];
 
     public function user()
@@ -32,6 +36,11 @@ class Order extends Model
     public function coupon()
     {
         return $this->belongsTo(Coupon::class);
+    }
+
+    public function gateway()
+    {
+        return $this->belongsTo(Gateway::class, 'gateway_id');
     }
 
 }
