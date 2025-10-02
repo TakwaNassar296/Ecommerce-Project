@@ -35,8 +35,8 @@ class CheckoutController extends Controller
             'customer_email'  => $request->user()->email ?? 'guest@example.com',
             'Customer_mobile' => $request->user()->phone ?? '01210569957',
             'items'           => $items,
-            'callback_url'    => route('payment.callback'),
-            'error_url'       => route('payment.error'),
+            'callback_url'    => route('payment.success'),
+            'error_url'       => route('payment.failed'),
             'currency'        => 'USD',
         ];
 
@@ -44,13 +44,22 @@ class CheckoutController extends Controller
 
         $paymentResponse = $gateway->pay($data);
 
+        $order->update([
+            'invoice_id' => $paymentResponse['invoiceId'],
+            'currency' => $data['currency'],
+            'gateway_id' => 1 ,
+        ]);
+
         return response()->json($paymentResponse);
     }
     public function paymentCallback(Request $request)
     {
-        $invoiceId = $request->input('invoiceId'); 
+        $PaymentId = $request->input('PaymentId'); 
+
         $gateway = PaymentFactory::make('myfatoorah');
-        $result = $gateway->handleCallback($invoiceId); 
+
+        $result = $gateway->handleCallback($PaymentId);
+
         return response()->json($result);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -20,6 +21,7 @@ class CategoryFactory extends Factory
             'name' => $this->faker->word(),
             'slug' => $this->faker->unique()->slug(),
             'parent_id' => null,
+            'tenant_id' => Tenant::factory(),
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Tenant;
 use App\Models\Category;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -23,6 +24,7 @@ class ProductFactory extends Factory
             'slug' => $this->faker->unique()->slug(),
             'image' => $this->faker->imageUrl(),
             'category_id' => Category::factory(), 
+            'tenant_id' => Tenant::factory(),
         ];
     }
 }

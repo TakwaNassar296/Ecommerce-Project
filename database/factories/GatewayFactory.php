@@ -2,14 +2,12 @@
 
 namespace Database\Factories;
 
-use App\Models\Tenant;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Cart>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Gateway>
  */
-class CartFactory extends Factory
+class GatewayFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -19,8 +17,9 @@ class CartFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => User::factory(),
-            'tenant_id' => Tenant::factory(),
+            'id' => 1,
+            'name' => 'MyFatoorah' ,
+            'is_active' => true,
         ];
     }
 }

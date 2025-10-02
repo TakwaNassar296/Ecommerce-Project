@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Builder;
 
 class User extends Authenticatable
 {
@@ -53,6 +54,36 @@ class User extends Authenticatable
     public function refreshTokens()
     {
         return $this->hasMany(RefreshToken::class);
+    }
+
+    public function tenant()
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope('tenant', function (Builder $query) {
+
+            $admin = auth('admin')->user();
+            if ($admin) {
+
+                $query->where('tenant_id', $admin->tenant_id);
+
+                $query->whereBelongsTo($admin->tenant , 'tenant');
+            }
+        });
+
+        static::creating(function ($user) {
+            $admin = auth('admin')->user();
+
+            if ($admin) {
+                
+                $user->tenant_id = $admin->tenant_id;
+
+                $user->tenant()->associate($admin->tenant);
+            }
+        });
     }
    
 }

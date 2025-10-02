@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Models\Tenant;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Actions\Action;
@@ -31,6 +32,8 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->authGuard('admin')
             ->login()
+            ->profile()
+            ->tenant(Tenant::class)
             ->colors([
                 'primary' => Color::Amber,
             ])

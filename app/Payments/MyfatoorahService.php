@@ -28,7 +28,7 @@ class MyfatoorahService implements PaymentInterface
             'CustomerName' => $data['customer_name'],
             'CustomerEmail' => $data['customer_email'],
             'CustomerMobile' => $data['Customer_mobile'],
-            'DisplayCurrencyIso' => $data['currency'] ?? 'EGP',
+            'DisplayCurrencyIso' => $data['currency'] ,
             'InvoiceItems' => $data['items'],
             'CallBackUrl' => $data['callback_url'],
             'ErrorUrl' => $data['error_url'],
@@ -48,40 +48,76 @@ class MyfatoorahService implements PaymentInterface
             'InvoiceUrl' => $response->Data->InvoiceURL,
         ];
     }
-    public function handleCallback($invoiceId)
+    public function handleCallback($PaymentId)
     {
-        $order = Order::where('invoice_id', $invoiceId)->firstOrFail();
-
         $url = ($this->payment->config['isTest'] ?? true)
             ? 'https://apitest.myfatoorah.com/v2/GetPaymentStatus'
             : 'https://api.myfatoorah.com/v2/GetPaymentStatus';
 
         $response = $this->payment->callAPI($url, [
-            'Key' => $invoiceId,
-            'KeyType' => 'InvoiceId'
+            'Key' => $PaymentId,
+            'KeyType' => 'PaymentId'
         ]);
 
-        $status = $response->Data->InvoiceStatus ?? 'Failed';
 
-        if ($status === 'Paid') {
-            $order->status = 'paid';
+        $InvoiceId = $response->Data->InvoiceId ?? null;
+
+        $status = $response->Data->InvoiceStatus ?? 'unknown';
+
+        if(!$InvoiceId)
+        {
+            return [
+                'success' => false , 
+                'message' => 'No InvoiceId returned from my fatoorah'
+            ];
+        }
+
+        $order = Order::where('invoice_id' , $InvoiceId)->first();
+
+        if(!$order){
+            return [
+                'success' => false , 
+                'message' => 'Order not found for invoice' . $InvoiceId ,
+            ];
+        }
+
+       switch ($status) {
+        case 'Paid':
+            $order->payment_status = 'paid';
             $order->paid_at = now();
             $order->save();
-
             return [
                 'success' => true,
                 'message' => 'Payment successful',
                 'order_id' => $order->id
             ];
-        } else {
-            $order->status = 'failed';
-            $order->save();
 
+        case 'Pending':
+            $order->payment_status = 'pending';
+            $order->save();
             return [
                 'success' => false,
-                'message' => 'Payment failed',
+                'message' => 'Payment still pending',
                 'order_id' => $order->id
             ];
-        }
-    }
+
+        case 'Expired':
+        case 'Canceled':
+            $order->payment_status = strtolower($status);
+            $order->save();
+            return [
+                'success' => false,
+                'message' => "Payment $status",
+                'order_id' => $order->id
+            ];
+
+        default:
+            $order->payment_status = 'unknown';
+            $order->save();
+            return [
+                'success' => false,
+                'message' => 'Unknown payment status',
+                'order_id' => $order->id
+            ];
+    }    }
 }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -41,6 +42,36 @@ class Order extends Model
     public function gateway()
     {
         return $this->belongsTo(Gateway::class, 'gateway_id');
+    }
+
+    public function tenant()
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+    protected static function booted(): void
+    {
+        static::addGlobalScope('tenant', function (Builder $query) {
+
+            $admin = auth('admin')->user();
+            if ($admin) {
+
+                $query->where('tenant_id', $admin->tenant_id);
+
+                $query->whereBelongsTo($admin->tenant , 'tenant');
+            }
+        });
+
+
+        static::creating(function ($order) {
+            $admin = auth('admin')->user();
+
+            if ($admin) {
+                
+                $order->tenant_id = $admin->tenant_id;
+
+                $order->tenant()->associate($admin->tenant);
+            }
+        });
     }
 
 }
