@@ -16,7 +16,8 @@ class Product extends Model
         'description',
         'slug',
         'image',
-        'category_id'
+        'category_id',
+        'tenant_id' 
     ];
 
 

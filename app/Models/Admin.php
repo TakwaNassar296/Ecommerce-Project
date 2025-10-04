@@ -20,6 +20,7 @@ class Admin extends Authenticatable implements FilamentUser , HasTenants
         'name' ,
         'email' ,
         'password' ,
+        'tenant_id' 
     ];
 
     protected $hidden = [

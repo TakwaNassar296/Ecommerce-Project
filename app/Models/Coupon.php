@@ -18,7 +18,8 @@ class Coupon extends Model
         'expires_at',
         'usage_limit',
         'used_count',
-        'is_active'
+        'is_active',
+        'tenant_id' 
     ];
 
     protected $casts = [

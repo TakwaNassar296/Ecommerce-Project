@@ -21,7 +21,8 @@ class Order extends Model
         'currency',
         'invoice_id',
         'paid_at',
-        'gateway_id'
+        'gateway_id',
+        'tenant_id' 
     ];
 
     public function user()

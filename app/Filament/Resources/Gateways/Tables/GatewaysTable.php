@@ -23,6 +23,11 @@ class GatewaysTable
                     ->searchable(),
                 IconColumn::make('is_active')
                     ->boolean(),
+                TextColumn::make('api_key')
+                    ->label('Api Key'),
+                IconColumn::make('is_test')
+                    ->boolean()
+                    ->label('Test Mode'),    
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

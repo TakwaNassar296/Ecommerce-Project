@@ -15,10 +15,6 @@ return new class extends Migration
             $table->foreignId('tenant_id')->nullable()->constrained()->onDelete('cascade');
         });
 
-        Schema::table('users', function (Blueprint $table) {
-            $table->foreignId('tenant_id')->nullable()->constrained()->onDelete('cascade');
-        });
-
         Schema::table('products', function (Blueprint $table) {
             $table->foreignId('tenant_id')->nullable()->constrained()->onDelete('cascade');
         });
@@ -46,12 +42,6 @@ return new class extends Migration
    public function down()
     {
         Schema::table('admins', function (Blueprint $table) {
-            $table->dropForeign(['tenant_id']);
-            $table->dropColumn('tenant_id');
-        });
-
-
-        Schema::table('users', function (Blueprint $table) {
             $table->dropForeign(['tenant_id']);
             $table->dropColumn('tenant_id');
         });

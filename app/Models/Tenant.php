@@ -21,7 +21,7 @@ class Tenant extends Model
 
     public function users()
     {
-        return $this->hasMany(User::class);
+        return $this->belongsToMany(User::class , 'tenant_user');
     }
 
     public function products()
@@ -47,5 +47,15 @@ class Tenant extends Model
     public function coupons()
     {
         return $this->hasMany(Coupon::class);
+    }
+
+    public function settings()
+    {
+        return $this->hasMany(Setting::class);
+    }
+
+    public function gateways()
+    {
+        return $this->hasMany(Gateway::class);
     }
 }

@@ -56,32 +56,28 @@ class User extends Authenticatable
         return $this->hasMany(RefreshToken::class);
     }
 
-    public function tenant()
+    public function tenants()
     {
-        return $this->belongsTo(Tenant::class);
+        return $this->belongsToMany(Tenant::class , 'tenant_user');
     }
 
     protected static function booted(): void
     {
         static::addGlobalScope('tenant', function (Builder $query) {
-
             $admin = auth('admin')->user();
-            if ($admin) {
 
-                $query->where('tenant_id', $admin->tenant_id);
-
-                $query->whereBelongsTo($admin->tenant , 'tenant');
+            if ($admin && $admin->tenant_id) {
+                $query->whereHas('tenants', function ($q) use ($admin) {
+                    $q->where('tenants.id', $admin->tenant_id);
+                });
             }
         });
 
-        static::creating(function ($user) {
+        static::created(function ($user) {
             $admin = auth('admin')->user();
 
-            if ($admin) {
-                
-                $user->tenant_id = $admin->tenant_id;
-
-                $user->tenant()->associate($admin->tenant);
+            if ($admin && $admin->tenant_id) {
+                $user->tenants()->syncWithoutDetaching($admin->tenant_id);
             }
         });
     }
