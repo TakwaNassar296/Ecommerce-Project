@@ -11,7 +11,7 @@ class Tenant extends Model
     use HasFactory , SoftDeletes ;
 
     protected $fillable = [
-        'name' , 'domain'
+        'name' , 'domain' , 'logo' , 'email' , 'phone' , 'address' , 'currency' , 'description'
     ];
     
     public function admins()
@@ -49,13 +49,18 @@ class Tenant extends Model
         return $this->hasMany(Coupon::class);
     }
 
-    public function settings()
-    {
-        return $this->hasMany(Setting::class);
-    }
-
     public function gateways()
     {
         return $this->hasMany(Gateway::class);
+    }
+
+    public function personalAccessTokens()
+    {
+        return $this->hasMany(PersonalAccessToken::class);
+    }
+
+    public function refreshTokens()
+    {
+        return $this->hasMany(RefreshToken::class);
     }
 }

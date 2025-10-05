@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
 
           GatewaySeeder::class,
+          AdminSeeder::class,
           
         ]);
         Tenant::factory(10)->create();

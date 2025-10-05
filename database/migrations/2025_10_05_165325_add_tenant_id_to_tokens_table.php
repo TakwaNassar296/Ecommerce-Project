@@ -11,13 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('gateways', function (Blueprint $table) {
+        Schema::table('personal_access_tokens', function (Blueprint $table) {
             $table->foreignId('tenant_id')->nullable()->constrained()->onDelete('cascade');
-            $table->string('api_key')->nullable();
-            $table->boolean('is_test')->default(true);
         });
 
-        Schema::table('settings', function (Blueprint $table) {
+        Schema::table('refresh_tokens', function (Blueprint $table) {
             $table->foreignId('tenant_id')->nullable()->constrained()->onDelete('cascade');
         });
     }
@@ -27,15 +25,12 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('gateways', function (Blueprint $table) {
+        Schema::table('personal_access_tokens', function (Blueprint $table) {
             $table->dropForeign(['tenant_id']);
             $table->dropColumn('tenant_id');
-            $table->dropColumn('api_key');
-            $table->dropColumn('is_test');
         });
 
-
-        Schema::table('settings', function (Blueprint $table) {
+        Schema::table('refresh_tokens', function (Blueprint $table) {
             $table->dropForeign(['tenant_id']);
             $table->dropColumn('tenant_id');
         });

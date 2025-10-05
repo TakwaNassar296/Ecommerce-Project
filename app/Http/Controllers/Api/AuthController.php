@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\User;
+use App\Models\Tenant;
 use Illuminate\Support\Str;
 use App\Models\RefreshToken;
 use Illuminate\Http\Request;
@@ -10,8 +11,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use function Laravel\Prompts\password;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\Validator;
 
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -24,23 +25,41 @@ class AuthController extends Controller
     {
         $v = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email',
+            'email' => 'required|string|email|max:255',
             'password' => 'required|string|min:6|confirmed',
+            'tenant_id' => 'required|exists:tenants,id',
         ]);
 
         if ($v->fails()) {
-            return $this->sendResponse('Validation error', $v->errors(), Response::HTTP_UNPROCESSABLE_ENTITY);
+            return $this->sendResponse( $v->errors(),null ,  422);
         }
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-        ]);
+        $user = User::where('email', $request->email)->first();
 
-        $tokens = $this->createTokensForUser($user, $request);
+        if ($user) {
+        
+            $alreadyLinked = $user->tenants()->where('tenant_id', $request->tenant_id)->exists();
 
-        return $this->sendResponse('Registered successfully', $tokens, Response::HTTP_CREATED);
+            if ($alreadyLinked) {
+                return $this->sendResponse('User already registered in this store', null, 409);
+            }
+
+            $user->tenants()->attach($request->tenant_id);
+
+        } else {
+           
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => bcrypt($request->password),
+            ]);
+
+            $user->tenants()->attach($request->tenant_id);
+        }
+
+        $tokens = $this->createTokensForUser($user, $request );
+
+        return $this->sendResponse('Registered successfully', $tokens, 201);
     }
 
     public function login(Request $request)
@@ -48,21 +67,28 @@ class AuthController extends Controller
         $v = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required|string',
+            'tenant_id' => 'required|exists:tenants,id',
         ]);
 
         if ($v->fails()) {
-            return $this->sendResponse('Validation error', $v->errors(), Response::HTTP_UNPROCESSABLE_ENTITY);
+            return $this->sendResponse( $v->errors(), null , 422);
         }
 
         $user = User::where('email', $request->email)->first();
 
         if (! $user || ! Hash::check($request->password, $user->password)) {
-            return $this->sendResponse('Invalid credentials', null, Response::HTTP_UNAUTHORIZED);
+            return $this->sendResponse('Invalid credentials', null, 401);
+        }
+
+        $isLinked = $user->tenants()->where('tenant_id', $request->tenant_id)->exists();
+
+        if (! $isLinked) {
+            return $this->sendResponse('User not associated with this store', null, 403);
         }
 
         $tokens = $this->createTokensForUser($user, $request);
 
-        return $this->sendResponse('Logged in successfully', $tokens, Response::HTTP_OK);
+        return $this->sendResponse('Logged in successfully', $tokens, 200);
     }
 
     public function user(Request $request)
@@ -70,20 +96,22 @@ class AuthController extends Controller
         return $this->sendResponse('User retrieved', $request->user(), Response::HTTP_OK);
     }
 
-    public function logout(Request $request)
+    public function logout(Request $request, $tenantId = null)
     {
-        // revoke current access token
+        
         $token = $request->user()->currentAccessToken();
         if ($token) {
             $token->delete();
         }
 
-        // revoke all refresh tokens for this user (optional)
-        RefreshToken::where('user_id', $request->user()->id)->update(['revoked' => true]);
+        $query = RefreshToken::where('user_id', $request->user()->id);
+        if ($tenantId) {
+            $query->where('tenant_id', $tenantId);
+        }
+        $query->update(['revoked' => true]);
 
         return $this->sendResponse('Logged out', null, Response::HTTP_OK);
     }
-
     public function refresh(Request $request)
     {
         $request->validate([
@@ -138,19 +166,23 @@ class AuthController extends Controller
 
     protected function createTokensForUser(User $user, Request $request)
     {
-        // create access token
+        
         $accessToken = $user->createToken('access_token');
         $plainAccess = $accessToken->plainTextToken;
+
+        
         $tokenModel = $accessToken->accessToken;
+        $tokenModel->tenant_id = $request->tenant_id; 
         $tokenModel->expires_at = now()->addMinutes($this->accessTokenTTLMinutes);
         $tokenModel->save();
 
-        // create refresh token 
+        
         $refreshPlain = Str::random(80);
         $refreshHash = hash('sha256', $refreshPlain);
 
         $refresh = RefreshToken::create([
             'user_id' => $user->id,
+            'tenant_id' => $request->tenant_id, 
             'token_hash' => $refreshHash,
             'expires_at' => now()->addDays($this->refreshTokenTTLDays),
             'ip' => $request->ip(),

@@ -16,7 +16,8 @@ class RefreshToken extends Model
         'expires_at',
         'revoked',
         'ip',
-        'user_agent'
+        'user_agent' ,
+        'tenant_id'
     ];
 
 
@@ -28,6 +29,11 @@ class RefreshToken extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function tenant()
+    {
+        return $this->belongsTo(Tenant::class);
     }
 
     public function isExpired() :bool
