@@ -45,6 +45,8 @@ This is a full-featured Ecommerce project built with Laravel, now enhanced with 
 - Redirects to existing user edit page if email already exists
 - Ensures secure and isolated user management per tenant
 
+---
+
 ## Updates
 
 - [Date] Added Single Database Multi-Tenant support  
@@ -52,5 +54,33 @@ This is a full-featured Ecommerce project built with Laravel, now enhanced with 
 - [Date] Updated Admin model to implement HasTenants  
 - [Date] Added global scopes for tenant data filtering  
 - [Date] Updated User management to support multi-tenant many-to-many relationships  
-- [Date] Prevent duplicate users and automatically link to tenant in Filament
-- [Date] Seeders and factories updated for multi-tenant testing
+- [Date] Prevent duplicate users and automatically link to tenant in Filament  
+- [Date] Seeders and factories updated for multi-tenant testing  
+
+---
+
+## 🔄 October 2025 Updates — Real-Time & Notifications
+
+### 🔔 Real-Time Notifications (Pusher)
+- Integrated Pusher for real-time order broadcasting.
+- Configured private channels per customer (private-order.{customer_id}).
+- Added OrderCreatedEvent implementing ShouldBroadcast.
+- Broadcast tested via Pusher Dashboard and log driver.
+
+### 📧 Email Notifications (Mailtrap)
+- Integrated Mailtrap for safe email testing.
+- Added automatic email notification when a new order is created.
+- Verified email sending successfully via test route.
+
+### 🧩 Events & Listeners
+- Added Laravel Events & Listeners architecture.
+- OrderCreatedEvent triggers:
+  - Real-time broadcast to customer’s private channel.
+  - Email notification to the customer.
+
+### 🧰 Notes
+- Ensure .env contains valid Pusher and Mailtrap credentials.
+- Run the following commands after updating .env:
+  `bash
+  php artisan config:clear
+  php artisan optimize:clear
