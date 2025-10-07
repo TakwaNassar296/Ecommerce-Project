@@ -1,86 +1,68 @@
 # Ecommerce Project (Multi-Tenant)
 
-This is a full-featured Ecommerce project built with Laravel, now enhanced with Single Database Multi-Tenant support.
+Project Overview:  
+A full-featured Ecommerce project built with Laravel, enhanced with Single Database Multi-Tenant support.  
+The system includes an admin dashboard, API for users, real-time notifications, and email notifications, with automatic tenant data isolation to ensure security and proper access control.
+
+---
 
 ## Features
 
 ### Core Modules
-- Category, Product, Variant, Coupon, Order, Order Item, Cart, Cart Item
-- Dashboard using Filament
-- Filament Resources, RelationManagers, and Widgets
-- All resources and widgets automatically filtered per tenant (multi-tenancy)
-- Single Database Multi-Tenant
-- Each admin belongs to a specific tenant (store/branch)
-- All data (Orders, Products, Coupons, etc.) is scoped automatically per tenant
-- Tenant filtering handled via global scopes and HasTenants implementation in Admin model
-- Users can belong to multiple tenants (many-to-many)
-- Prevents duplicate user creation
-- Admin adding a user automatically links them to their tenant if already existing
-- Filament dashboard shows users scoped per tenant
-- Global tenant filtering ensures data isolation
+- Categories, Products, Variants: Manage product catalog with multiple variations.  
+- Coupons: Create and apply discount codes scoped to each tenant.  
+- Orders & Order Items: Track and manage customer orders and their items.  
+- Cart & Cart Items: Implement shopping cart using Repository Design Pattern.  
+- Multi-Tenant Support:  
+- Admins and users are linked to specific tenants (stores/branches).  
+- Automatic data filtering per tenant using Global Scopes and HasTenants trait.  
+- Users can belong to multiple tenants without duplication.  
+
+---
 
 ### Authentication
-- API authentication using Laravel Sanctum
-- Register, Login, Logout
-- Access and Refresh Tokens
-- Forget and Reset Password
-- Multi-guard authentication
-- Separate tables for users (API login) and admins (dashboard login)
-- Admins automatically linked to their tenant
+- API Authentication (Laravel Sanctum): Register, login, logout, access and refresh tokens.  
+- Multi-Guard Authentication: Separate admin and API user tables.  
+- Password Management: Forgot and reset password functionality.  
+- Tenant Linking: Users added via admin panel are automatically linked to the tenant if already existing.  
+
+---
 
 ### API
-- Categories, Products, and Orders APIs
-- Cart API implemented using Repository Design Pattern
-- Checkout function tested with Unit Tests
-- MyFatoorah payment integration implemented using Factory Design Pattern
-- APIs respect tenant scoping automatically when accessed via dashboard/admin
-
-### Admin Panel
-- Admins see only their tenant’s data
-- Resources, tables, and widgets automatically scoped per tenant
-- Global tenant filtering prevents access to other tenants’ data
-- Admin can manage Products, Orders, Coupons, Categories based on tenant permissions
-- User management supports multi-tenant linking
-- Existing users can be linked to multiple tenants without creating duplicates
-- Redirects to existing user edit page if email already exists
-- Ensures secure and isolated user management per tenant
+- RESTful APIs for categories, products, and orders.  
+- Cart API implemented with Repository Design Pattern.  
+- Checkout & Payment Integration: MyFatoorah integration implemented using Factory Design Pattern.  
+- Tenant Scoping: All API endpoints automatically respect tenant isolation.  
 
 ---
 
-## Updates
-
-- [Date] Added Single Database Multi-Tenant support  
-- [Date] Implemented tenant filtering for all resources and widgets in Filament  
-- [Date] Updated Admin model to implement HasTenants  
-- [Date] Added global scopes for tenant data filtering  
-- [Date] Updated User management to support multi-tenant many-to-many relationships  
-- [Date] Prevent duplicate users and automatically link to tenant in Filament  
-- [Date] Seeders and factories updated for multi-tenant testing  
+### Admin Panel (Filament)
+- Scoped Data: Admins can only access their tenant's data.  
+- Resources, Tables & Widgets: Automatically filtered per tenant.  
+- User Management:  
+- Link users to multiple tenants without creating duplicates.  
+- Redirect to existing user edit page if the email already exists.  
 
 ---
 
-## 🔄 October 2025 Updates — Real-Time & Notifications
+### Real-Time & Notifications
+- Pusher: Real-time order notifications via private channels (private-order.{customer_id}).  
+- Events & Listeners: OrderCreatedEvent triggers:  
+- Real-time broadcast to the customer.  
+- Email notification sent automatically.  
+- Jobs: Emails are queued using Laravel Jobs to ensure background processing.  
 
-### 🔔 Real-Time Notifications (Pusher)
-- Integrated Pusher for real-time order broadcasting.
-- Configured private channels per customer (private-order.{customer_id}).
-- Added OrderCreatedEvent implementing ShouldBroadcast.
-- Broadcast tested via Pusher Dashboard and log driver.
+---
 
-### 📧 Email Notifications (Mailtrap)
-- Integrated Mailtrap for safe email testing.
-- Added automatic email notification when a new order is created.
-- Verified email sending successfully via test route.
+### Reporting & Commands
+- DailyOrderReport Command:  
+- Generates daily report of orders for each tenant.  
+- Sends email notification to the tenant’s admin.  
+- Command can be triggered manually or scheduled.  
 
-### 🧩 Events & Listeners
-- Added Laravel Events & Listeners architecture.
-- OrderCreatedEvent triggers:
-  - Real-time broadcast to customer’s private channel.
-  - Email notification to the customer.
+---
 
-### 🧰 Notes
-- Ensure .env contains valid Pusher and Mailtrap credentials.
-- Run the following commands after updating .env:
-  `bash
-  php artisan config:clear
-  php artisan optimize:clear
+### Notes
+- All features are designed for single database multi-tenancy, ensuring secure and isolated data per tenant.  
+- Project demonstrates modern Laravel practices including Jobs, Events, Listeners, Repository & Factory Patterns, and Filament admin panel customization.  
+- Ideal for showcasing backend development skills, multi-tenancy architecture, and API design.

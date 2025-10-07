@@ -3,24 +3,25 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class OrderCreatedMail extends Mailable
+class DailyOrdersReportMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $order ;
+    public $count;
+    public $date;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($order)
+    public function __construct($count, $date)
     {
-        $this->order = $order ;
+        $this->count = $count;
+        $this->date = $date;
     }
 
     /**
@@ -29,7 +30,7 @@ class OrderCreatedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Order Confirmation' . $this->order->id,
+            subject: '📊 Daily Orders Report',
         );
     }
 
@@ -40,11 +41,14 @@ class OrderCreatedMail extends Mailable
     {
         return new Content(
             htmlString: "
-                Order #{$this->order->id} has been created successfully.
-                Total: {$this->order->subtotal} EGP
+                <h2>Daily Orders Report</h2>
+                <p><strong>Date:</strong> {$this->date}</p>
+                <p><strong>Total Orders:</strong> {$this->count}</p>
+                <p>This is an automated report from the system.</p>
             ",
         );
     }
+
     /**
      * Get the attachments for the message.
      *
